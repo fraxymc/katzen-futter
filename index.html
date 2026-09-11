@@ -5,35 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Katzenfutter Status</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; }
-    .status { font-size: 2rem; margin: 20px 0; font-weight: bold; }
-    .fed { color: green; }
-    .not-fed { color: red; }
-    button { font-size: 1.5rem; padding: 15px 30px; border-radius: 10px; border: none; background: #007bff; color: white; cursor: pointer; }
+    body { font-family: system-ui, sans-serif; text-align: center; padding: 40px 20px; background: #121212; color: white; }
+    .card { background: #1e1e1e; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .status { font-size: 2rem; font-weight: bold; margin: 25px 0; }
+    .fed { color: #4caf50; }
+    .not-fed { color: #f44336; }
+    button { font-size: 1.2rem; padding: 16px 32px; border-radius: 12px; border: none; background: #2196f3; color: white; font-weight: bold; cursor: pointer; width: 100%; }
+    button:active { transform: scale(0.98); }
   </style>
 </head>
 <body>
-  <h1>Wurde die Katze heute gefüttert?</h1>
-  <div id="status" class="status"></div>
-  <button onclick="feed()">Ich habe gefüttert!</button>
+  <div class="card">
+    <h1>Katze gefüttert?</h1>
+    <div id="status" class="status">Lade Status...</div>
+    <button onclick="feed()">Ich habe gefüttert! 🐱</button>
+  </div>
 
   <script>
+    // DEINE DATEN HIER EINFÜGEN:
+    const BIN_ID = "6aa44282ffd5d16053fb46b5";
+    const API_KEY = "$2a$10$xF1uYDUefvLBwhqBRyhy0.uyGVeezvg0X70zHKVW.6wRQb59WJgXS";
+
+    const URL = https://api.jsonbin.io/v3/b/${BIN_ID};
     const today = new Date().toISOString().split('T')[0];
-    
-    function checkStatus() {
-      const lastFed = localStorage.getItem('lastFedDate');
-      const statusDiv = document.getElementById('status');
-      if (lastFed === today) {
-        statusDiv.innerText = "JA! 😺 (Schon gefüttert)";
-        statusDiv.className = "status fed";
-      } else {
-        statusDiv.innerText = "NEIN 😿 (Noch nicht gefüttert)";
-        statusDiv.className = "status not-fed";
+
+    async function checkStatus() {
+      try {
+        const res = await fetch(URL, { headers: { "X-Master-Key": API_KEY } });
+        const data = await res.json();
+        const lastFed = data.record.lastFed;
+        
+        const statusDiv = document.getElementById('status');
+        if (lastFed === today) {
+          statusDiv.innerText = "JA! 😺";
+          statusDiv.className = "status fed";
+        } else {
+          statusDiv.innerText = "NEIN 😿";
+          statusDiv.className = "status not-fed";
+        }
+      } catch (err) {
+        document.getElementById('status').innerText = "Fehler beim Laden";
       }
     }
 
-    function feed() {
-      localStorage.setItem('lastFedDate', today);
+    async function feed() {
+      document.getElementById('status').innerText = "Speichere...";
+      await fetch(URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": API_KEY
+        },
+        body: JSON.stringify({ lastFed: today })
+      });
       checkStatus();
     }
 

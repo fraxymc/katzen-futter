@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katzenfutter Status</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; }
+    .status { font-size: 2rem; margin: 20px 0; font-weight: bold; }
+    .fed { color: green; }
+    .not-fed { color: red; }
+    button { font-size: 1.5rem; padding: 15px 30px; border-radius: 10px; border: none; background: #007bff; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Wurde die Katze heute gefüttert?</h1>
+  <div id="status" class="status"></div>
+  <button onclick="feed()">Ich habe gefüttert!</button>
+
+  <script>
+    const today = new Date().toISOString().split('T')[0];
+    
+    function checkStatus() {
+      const lastFed = localStorage.getItem('lastFedDate');
+      const statusDiv = document.getElementById('status');
+      if (lastFed === today) {
+        statusDiv.innerText = "JA! 😺 (Schon gefüttert)";
+        statusDiv.className = "status fed";
+      } else {
+        statusDiv.innerText = "NEIN 😿 (Noch nicht gefüttert)";
+        statusDiv.className = "status not-fed";
+      }
+    }
+
+    function feed() {
+      localStorage.setItem('lastFedDate', today);
+      checkStatus();
+    }
+
+    checkStatus();
+  </script>
+</body>
+</html>
